@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface ShipService {
 
+    // Получаем список кораблей без какой-либо фильтрации или сортировки
     List<Ship> getAllShipsUnfiltered();
 
     Ship saveShip(Ship ship);
