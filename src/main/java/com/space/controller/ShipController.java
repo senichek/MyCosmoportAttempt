@@ -25,6 +25,7 @@ public class ShipController {
     @RequestMapping(path = "/rest/ships", method = RequestMethod.GET)
     public List<Ship> getAllShips() {
 
-        return shipService.getAllShipsNoParam();
+        // Получаем список кораблей без какой-либо фильтрации или сортировки
+        return shipService.getAllShipsUnfiltered();
     }
 }

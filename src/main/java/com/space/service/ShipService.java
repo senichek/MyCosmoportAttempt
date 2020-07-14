@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface ShipService {
 
-    List<Ship> getAllShipsNoParam();
+    List<Ship> getAllShipsUnfiltered();
 
     Ship saveShip(Ship ship);
 

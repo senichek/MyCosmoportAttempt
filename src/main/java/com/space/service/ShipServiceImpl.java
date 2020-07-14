@@ -29,7 +29,7 @@ public class ShipServiceImpl implements ShipService {
     }
 
     @Override
-    public List<Ship> getAllShipsNoParam() {
+    public List<Ship> getAllShipsUnfiltered() {
         List<Ship> allShipsList = new ArrayList<>();
         Iterable<Ship> ships = shipRepository.findAll();
         for (Ship x : ships) {
