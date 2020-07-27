@@ -37,7 +37,7 @@ public interface ShipService {
 
     List<Ship> sortShips(List<Ship> ships, ShipOrder order);
 
-    List<Ship> getPage(List<Ship> ships, Integer pageNumber, Integer pageSize);
+    List<Ship> getSublistBasedOnPageSizeAndPageNumber(List<Ship> ships, Integer pageNumber, Integer pageSize);
 
     boolean isShipValid(Ship ship);
 

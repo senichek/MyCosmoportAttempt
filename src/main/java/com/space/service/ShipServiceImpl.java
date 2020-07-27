@@ -68,7 +68,8 @@ public class ShipServiceImpl implements ShipService {
     }
 
     @Override
-    public List<Ship> getPage(List<Ship> ships, Integer pageNumber, Integer pageSize) {
+    public List<Ship> getSublistBasedOnPageSizeAndPageNumber(List<Ship> ships, Integer pageNumber, Integer pageSize) {
+
         return null;
     }
 
