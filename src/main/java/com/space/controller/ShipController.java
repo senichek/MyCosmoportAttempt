@@ -43,39 +43,12 @@ public class ShipController {
             @RequestParam(value = "pageSize", required = false) Integer pageSize
     ) {
 
-        // indexFrom расчитываем по формуле pageNum * pageSize;
-        // indexTO расчитываем по формуле indexFrom + pageSize;
+        // Получаем весь список кораблей
+        List<Ship> allShips = shipService.getAllShipsUnfiltered();
+       List<Ship> sortedByOrder = shipService.sortShipsByOrder(allShips, order);
 
-        Integer indexTO = 0;
-        Integer indexFrom = 0;
-
-
-    // при первом запуске показываем весь список
-        if (pageSize == null || pageNumber == null) {
-
-                /* Вместо всего списка можно вывести лишь первые три корабля, так как при запуске на странице в поле
-            "Ships in a page" всегда установлено значение 3.  */
-
-            return shipService.getAllShipsUnfiltered();
-
-        }
-
-        /*но если получаем параметры PageSize и PageNumber, то выводим часть списка на основе indexFrom и indexTO.
-        например, при размере страницы 5 и номере страницы 2 выводим список кораблей с 6 по 10 номер. */
-        else {
-
-            indexFrom = pageNumber * pageSize;
-            indexTO = indexFrom + pageSize;
-
-            /* indexTo не должен выходить за пределы подсписка. Если indexTo выходит за пределы списка, то
-            переменной indexTO присваивается значение равное размеру списка*/
-            if (indexTO > shipService.getAllShipsUnfiltered().size()) {
-                indexTO = shipService.getAllShipsUnfiltered().size();
-            }
-
-            return shipService.getAllShipsUnfiltered().subList(indexFrom, indexTO);
-
-        }
+        // возвращаем подсписок на основе размера и номера страницы
+        return shipService.getSublistBasedOnPageSizeAndPageNumber(sortedByOrder, pageNumber, pageSize);
 
     }
 

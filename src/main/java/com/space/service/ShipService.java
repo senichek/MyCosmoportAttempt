@@ -35,7 +35,7 @@ public interface ShipService {
             Double maxRating
     );
 
-    List<Ship> sortShips(List<Ship> ships, ShipOrder order);
+    List<Ship> sortShipsByOrder(List<Ship> ships, ShipOrder order);
 
     List<Ship> getSublistBasedOnPageSizeAndPageNumber(List<Ship> ships, Integer pageNumber, Integer pageSize);
 
