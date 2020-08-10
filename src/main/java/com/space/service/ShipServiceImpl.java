@@ -184,37 +184,6 @@ public class ShipServiceImpl implements ShipService {
     }
 
     @Override
-    public List<Ship> getFilteredShips(
-            String name,
-            String planet,
-            ShipType shipType,
-            Long after,
-            Long before,
-            Boolean isUsed,
-            Double minSpeed,
-            Double maxSpeed,
-            Integer minCrewSize,
-            Integer maxCrewSize,
-            Double minRating,
-            Double maxRating,
-            ShipOrder order,
-            Integer pageNumber,
-            Integer pageSize) {
-
-        /* Логика: сначала получаем список кораблей, отфильтрованный по какому-либо параметру (например, по макс. и мин. скорости).
-        После этого сортируем этот список по полю Order. После этого выводим часть этого списка на основе номера страницы.
-         и ее размера. */
-
-        // Получаем весь список кораблей
-        List<Ship> allShips = getAllShipsUnfiltered();
-
-        List<Ship> sortedByOrder = sortShipsByOrder(allShips, order);
-        // возвращаем подсписок на основе размера и номера страницы
-        return getSublistBasedOnPageSizeAndPageNumber(sortedByOrder, pageNumber, pageSize);
-
-    }
-
-    @Override
     public List<Ship> sortShipsByOrder(List<Ship> ships, ShipOrder order) {
 
         /* При первом запуске приложения корабли по-умолчанию выстроены по Order By ID, поэтому если параметр order
@@ -287,6 +256,8 @@ public class ShipServiceImpl implements ShipService {
     @Override
     public List<Ship> getSublistBasedOnPageSizeAndPageNumber(List<Ship> ships, Integer pageNumber, Integer pageSize) {
 
+        // Функция возвращает подписок кораблей на основе размера страницы и её номера.
+
         // indexFrom расчитываем по формуле pageNum * pageSize;
         // indexTO расчитываем по формуле indexFrom + pageSize;
         Integer indexTO = 0;
@@ -324,5 +295,46 @@ public class ShipServiceImpl implements ShipService {
     @Override
     public double computeRating(double speed, boolean isUsed, Date prod) {
         return 0;
+    }
+
+    @Override
+    public List<Ship> getFilteredShips(
+            String name,
+            String planet,
+            ShipType shipType,
+            Long after,
+            Long before,
+            Boolean isUsed,
+            Double minSpeed,
+            Double maxSpeed,
+            Integer minCrewSize,
+            Integer maxCrewSize,
+            Double minRating,
+            Double maxRating,
+            ShipOrder order,
+            Integer pageNumber,
+            Integer pageSize) {
+
+        /* Сначала получаем список кораблей и сортируем этот список по полю Order. После этого
+           фильтруем список по другим полям (например, по макс. и мин. скорости). */
+
+        // Получаем весь список кораблей
+        List<Ship> allShips = getAllShipsUnfiltered();
+
+        // сортируем по полю Order
+        List<Ship> sortedByOrder = sortShipsByOrder(allShips, order);
+
+        // Возвращаем список кораблей, найденных по переданным параметрам
+        List<Ship> filteredShips = new ArrayList<>();
+        if (minCrewSize != null || maxCrewSize != null) {
+            filteredShips = getShipsBetweenMinAndMaxCrewSize(sortedByOrder, minCrewSize, maxCrewSize);
+
+            return filteredShips;
+        }
+
+        // Если параметры переданы не были, то возвращаем все корабли сразу
+        else {
+            return allShips;
+        }
     }
 }

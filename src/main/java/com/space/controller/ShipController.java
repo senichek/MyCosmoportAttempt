@@ -45,23 +45,39 @@ public class ShipController {
     ) {
 
 
-        /*// Получаем весь список кораблей
-        List<Ship> allShips = shipService.getAllShipsUnfiltered();
+        /* Получаем список кораблей, отфильтрованный по переданным параметрам. Если параметры переданы не были,
+        то возвращается список всех кораблей, находящихся в базе данных. */
+        List<Ship> filteredShips = shipService.getFilteredShips(
+                name, planet, shipType, after, before, isUsed, minSpeed, maxSpeed,
+                minCrewSize, maxCrewSize, minRating, maxRating, order, pageNumber, pageSize);
 
-        List<Ship> sortedByOrder = shipService.sortShipsByOrder(allShips, order);
-        // возвращаем подсписок на основе размера и номера страницы
-        return shipService.getSublistBasedOnPageSizeAndPageNumber(sortedByOrder, pageNumber, pageSize);*/
+        // Возвращаем часть списка в зависимоости от размера страницы и ее номера.
+        return shipService.getSublistBasedOnPageSizeAndPageNumber(filteredShips, pageNumber, pageSize);
+    }
 
-        return shipService.getFilteredShips(name, planet, shipType, after, before,
-                                            isUsed, minSpeed, maxSpeed, minCrewSize, maxCrewSize,
-                                            minRating, maxRating, order, pageNumber, pageSize);
-        }
+    @RequestMapping(path = "/rest/ships/count", method = RequestMethod.GET)
+    public Integer getShipsCount (
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "planet", required = false) String planet,
+            @RequestParam(value = "shipType", required = false) ShipType shipType,
+            @RequestParam(value = "after", required = false) Long after,
+            @RequestParam(value = "before", required = false) Long before,
+            @RequestParam(value = "isUsed", required = false) Boolean isUsed,
+            @RequestParam(value = "minSpeed", required = false) Double minSpeed,
+            @RequestParam(value = "maxSpeed", required = false) Double maxSpeed,
+            @RequestParam(value = "minCrewSize", required = false) Integer minCrewSize,
+            @RequestParam(value = "maxCrewSize", required = false) Integer maxCrewSize,
+            @RequestParam(value = "minRating", required = false) Double minRating,
+            @RequestParam(value = "maxRating", required = false) Double maxRating,
+            @RequestParam(value = "order", required = false) ShipOrder order,
+            @RequestParam(value = "pageNumber", required = false) Integer pageNumber,
+            @RequestParam(value = "pageSize", required = false) Integer pageSize
+    )
+    {
 
-
-        @RequestMapping(path = "/rest/ships/count", method = RequestMethod.GET)
-        public Integer getShipsCount () {
-
-            // Получаем общее количество кораблей, находящихся в базе данных
-            return shipService.getAllShipsUnfiltered().size();
+            // Получаем общее количество найденных кораблей.
+            return shipService.getFilteredShips(name, planet, shipType, after, before,
+                    isUsed, minSpeed, maxSpeed, minCrewSize, maxCrewSize,
+                    minRating, maxRating, order, pageNumber, pageSize).size();
         }
 }
