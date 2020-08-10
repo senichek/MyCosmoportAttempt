@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -43,19 +44,24 @@ public class ShipController {
             @RequestParam(value = "pageSize", required = false) Integer pageSize
     ) {
 
-        // Получаем весь список кораблей
+
+        /*// Получаем весь список кораблей
         List<Ship> allShips = shipService.getAllShipsUnfiltered();
-       List<Ship> sortedByOrder = shipService.sortShipsByOrder(allShips, order);
 
+        List<Ship> sortedByOrder = shipService.sortShipsByOrder(allShips, order);
         // возвращаем подсписок на основе размера и номера страницы
-        return shipService.getSublistBasedOnPageSizeAndPageNumber(sortedByOrder, pageNumber, pageSize);
+        return shipService.getSublistBasedOnPageSizeAndPageNumber(sortedByOrder, pageNumber, pageSize);*/
 
-    }
+        return shipService.getFilteredShips(name, planet, shipType, after, before,
+                                            isUsed, minSpeed, maxSpeed, minCrewSize, maxCrewSize,
+                                            minRating, maxRating, order, pageNumber, pageSize);
+        }
 
-    @RequestMapping(path = "/rest/ships/count", method = RequestMethod.GET)
-    public Integer getShipsCount() {
 
-        // Получаем общее количество кораблей, находящихся в базе данных
-        return shipService.getAllShipsUnfiltered().size();
-    }
+        @RequestMapping(path = "/rest/ships/count", method = RequestMethod.GET)
+        public Integer getShipsCount () {
+
+            // Получаем общее количество кораблей, находящихся в базе данных
+            return shipService.getAllShipsUnfiltered().size();
+        }
 }

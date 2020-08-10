@@ -16,7 +16,6 @@ public class ShipServiceImpl implements ShipService {
 
     private ShipRepository shipRepository;
 
-
     public ShipServiceImpl() {
     }
 
@@ -33,6 +32,7 @@ public class ShipServiceImpl implements ShipService {
         for (Ship x : ships) {
             allShipsList.add(x);
         }return allShipsList;
+
     }
 
     @Override
@@ -46,6 +46,134 @@ public class ShipServiceImpl implements ShipService {
     }
 
     @Override
+    public List<Ship> getShipsByFullOrPartialName(String name) {
+
+        /* Поиск по полям name и planet происходить по частичному соответствию. Например, если в БД есть корабль
+        с именем «Левиафан», а параметр name задан как «иа» - такой корабль должен отображаться в результатах (Левиафан). */
+
+        List<Ship> shipsFoundByName = new ArrayList<>();
+        List<Ship> allShips = getAllShipsUnfiltered();
+        for (Ship x : allShips) {
+            // возвращает true если имя включает в себя последновательность символов name
+            if (x.getName().contains(name)) {
+                shipsFoundByName.add(x);
+            }
+        }
+        return shipsFoundByName;
+    }
+
+    @Override
+    public List<Ship> getShipsByFullOrPartialPlanetName(String name) {
+        List<Ship> shipsFoundByPlanetName = new ArrayList<>();
+        List<Ship> allShips = getAllShipsUnfiltered();
+        for (Ship x : allShips) {
+            if (x.getPlanet().contains(name)) {
+                shipsFoundByPlanetName.add(x);
+            }
+        }
+        return shipsFoundByPlanetName;
+    }
+
+    public List<Ship> getShipsBeforeDate(Long before) {
+        List<Ship> allShips = getAllShipsUnfiltered();
+        List<Ship> shipsFoundByBeforeDate = new ArrayList<>();
+
+        Calendar cal = Calendar.getInstance();
+        // календарю устанавливаем год, до которого включительно будем выбирать корабли
+        cal.set(before.intValue(), 1, 1);
+        Date dateForComparison = cal.getTime();
+        for (Ship x : allShips) {
+            if (x.getProdDate().before(dateForComparison)) {
+                shipsFoundByBeforeDate.add(x);
+            }
+        }
+        return shipsFoundByBeforeDate;
+    }
+
+    public List<Ship> getShipsAfterDate(Long after) {
+        List<Ship> allShips = getAllShipsUnfiltered();
+        List<Ship> shipsFoundByAfterDate = new ArrayList<>();
+
+        Calendar cal = Calendar.getInstance();
+        // календарю устанавливаем год, после которого будем выбирать корабли
+        cal.set(after.intValue(), 1, 1);
+        Date dateForComparison = cal.getTime();
+        for (Ship x : allShips) {
+            if (x.getProdDate().after(dateForComparison)) {
+                shipsFoundByAfterDate.add(x);
+            }
+        }
+        return shipsFoundByAfterDate;
+    }
+
+    public List<Ship> getShipsBetweenMinAndMaxSpeedRange (Double minSpeed, Double maxSpeed) {
+
+        List<Ship> allShips = getAllShipsUnfiltered();
+        List<Ship> shipsBetweenMinAndMaxSpeedRange = new ArrayList<>();
+
+        if (minSpeed != null && maxSpeed == null) {
+            for (Ship x : allShips) {
+                if (x.getSpeed() >= minSpeed) {
+                    shipsBetweenMinAndMaxSpeedRange.add(x);
+                }
+            }
+        }
+
+        if (maxSpeed != null && minSpeed == null) {
+            for (Ship x : allShips) {
+                if (x.getSpeed() <= maxSpeed) {
+                    shipsBetweenMinAndMaxSpeedRange.add(x);
+                }
+            }
+        }
+
+        if (maxSpeed != null && minSpeed != null) {
+            for (Ship x : allShips) {
+                if (x.getSpeed() >= minSpeed && x.getSpeed() <= maxSpeed) {
+                    shipsBetweenMinAndMaxSpeedRange.add(x);
+                }
+            }
+
+        }
+
+        return shipsBetweenMinAndMaxSpeedRange;
+    }
+
+    @Override
+    public List<Ship> getShipsBetweenMinAndMaxCrewSize(List<Ship> ships, Integer minCrewSize, Integer maxCrewSize) {
+
+        List<Ship> shipsBetweenMinAndMaxCrewSize = new ArrayList<>();
+
+        if (minCrewSize != null && maxCrewSize == null) {
+            for (Ship x : ships) {
+                if (x.getCrewSize() >= minCrewSize) {
+                    shipsBetweenMinAndMaxCrewSize.add(x);
+                }
+            }
+        }
+
+        if (maxCrewSize != null && minCrewSize == null) {
+            for (Ship x : ships) {
+                if (x.getCrewSize() <= maxCrewSize) {
+                    shipsBetweenMinAndMaxCrewSize.add(x);
+                }
+            }
+        }
+
+        if (maxCrewSize != null && minCrewSize != null) {
+            for (Ship x : ships) {
+                if (x.getCrewSize() >= minCrewSize && x.getCrewSize() <= maxCrewSize) {
+                    shipsBetweenMinAndMaxCrewSize.add(x);
+                }
+            }
+
+        }
+
+        return shipsBetweenMinAndMaxCrewSize;
+    }
+
+
+    @Override
     public Ship updateShip(Ship oldShip, Ship newShip) throws IllegalArgumentException {
         return null;
     }
@@ -56,18 +184,47 @@ public class ShipServiceImpl implements ShipService {
     }
 
     @Override
-    public List<Ship> getShips(String name, String planet, ShipType shipType, Long after, Long before, Boolean isUsed, Double minSpeed, Double maxSpeed, Integer minCrewSize, Integer maxCrewSize, Double minRating, Double maxRating) {
-        return null;
+    public List<Ship> getFilteredShips(
+            String name,
+            String planet,
+            ShipType shipType,
+            Long after,
+            Long before,
+            Boolean isUsed,
+            Double minSpeed,
+            Double maxSpeed,
+            Integer minCrewSize,
+            Integer maxCrewSize,
+            Double minRating,
+            Double maxRating,
+            ShipOrder order,
+            Integer pageNumber,
+            Integer pageSize) {
+
+        /* Логика: сначала получаем список кораблей, отфильтрованный по какому-либо параметру (например, по макс. и мин. скорости).
+        После этого сортируем этот список по полю Order. После этого выводим часть этого списка на основе номера страницы.
+         и ее размера. */
+
+        // Получаем весь список кораблей
+        List<Ship> allShips = getAllShipsUnfiltered();
+
+        List<Ship> sortedByOrder = sortShipsByOrder(allShips, order);
+        // возвращаем подсписок на основе размера и номера страницы
+        return getSublistBasedOnPageSizeAndPageNumber(sortedByOrder, pageNumber, pageSize);
+
     }
 
     @Override
     public List<Ship> sortShipsByOrder(List<Ship> ships, ShipOrder order) {
 
+        /* При первом запуске приложения корабли по-умолчанию выстроены по Order By ID, поэтому если параметр order
+        не был передан,то устанавливаем ему значение id, чтобы выстроить корабли по ID при первом запуске приложения. */
         String orderName = new String();
         if (order == null) {
             orderName = "id";
         } else orderName = order.getFieldName();
 
+        // сортируем корабли по скорости
         switch (orderName) {
             case "speed":
                 Collections.sort(ships, new Comparator<Ship>() {
@@ -83,7 +240,7 @@ public class ShipServiceImpl implements ShipService {
                     }
                 });
                 break;
-
+            // сортируем корабли по дате производства
             case "prodDate":
                 Collections.sort(ships, new Comparator<Ship>() {
                     @Override
@@ -98,7 +255,7 @@ public class ShipServiceImpl implements ShipService {
                     }
                 });
                 break;
-
+            // сортируем корабли по рейтингу
             case "rating":
                 Collections.sort(ships, new Comparator<Ship>() {
                     @Override
@@ -107,7 +264,7 @@ public class ShipServiceImpl implements ShipService {
                     }
                 });
                 break;
-
+            // сортируем корабли по ID
             case "id":
                 Collections.sort(ships, new Comparator<Ship>() {
                     @Override

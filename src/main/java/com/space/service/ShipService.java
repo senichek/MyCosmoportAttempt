@@ -16,11 +16,23 @@ public interface ShipService {
 
     Ship getShip(Long id);
 
+    List<Ship> getShipsByFullOrPartialName(String name);
+
+    List<Ship> getShipsByFullOrPartialPlanetName(String name);
+
+    public List<Ship> getShipsBeforeDate(Long before);
+
+    public List<Ship> getShipsAfterDate(Long after);
+
+    public List<Ship> getShipsBetweenMinAndMaxSpeedRange (Double minSpeed, Double maxSpeed);
+
+    public List<Ship> getShipsBetweenMinAndMaxCrewSize (List<Ship> ships, Integer minCrewSize, Integer maxCrewSize);
+
     Ship updateShip(Ship oldShip, Ship newShip) throws IllegalArgumentException;
 
     void deleteShip(Ship ship);
 
-    List<Ship> getShips(
+    public List<Ship> getFilteredShips(
             String name,
             String planet,
             ShipType shipType,
@@ -32,7 +44,10 @@ public interface ShipService {
             Integer minCrewSize,
             Integer maxCrewSize,
             Double minRating,
-            Double maxRating
+            Double maxRating,
+            ShipOrder order,
+            Integer pageNumber,
+            Integer pageSize
     );
 
     List<Ship> sortShipsByOrder(List<Ship> ships, ShipOrder order);
