@@ -74,36 +74,98 @@ public class ShipServiceImpl implements ShipService {
         return shipsFoundByPlanetName;
     }
 
-    public List<Ship> getShipsBeforeDate(Long before) {
+    public List<Ship> getShipsByType (ShipType type) {
+        List<Ship> shipsFoundByShipType = new ArrayList<>();
         List<Ship> allShips = getAllShipsUnfiltered();
-        List<Ship> shipsFoundByBeforeDate = new ArrayList<>();
-
-        Calendar cal = Calendar.getInstance();
-        // календарю устанавливаем год, до которого включительно будем выбирать корабли
-        cal.set(before.intValue(), 1, 1);
-        Date dateForComparison = cal.getTime();
         for (Ship x : allShips) {
-            if (x.getProdDate().before(dateForComparison)) {
-                shipsFoundByBeforeDate.add(x);
+            if (x.getShipType() == type) {
+                shipsFoundByShipType.add(x);
             }
         }
-        return shipsFoundByBeforeDate;
+        return shipsFoundByShipType;
     }
 
-    public List<Ship> getShipsAfterDate(Long after) {
-        List<Ship> allShips = getAllShipsUnfiltered();
-        List<Ship> shipsFoundByAfterDate = new ArrayList<>();
+    @Override
+    public List<Ship> getShipsBetweenProdDates(Long before, Long after) {
 
-        Calendar cal = Calendar.getInstance();
-        // календарю устанавливаем год, после которого будем выбирать корабли
-        cal.set(after.intValue(), 1, 1);
-        Date dateForComparison = cal.getTime();
-        for (Ship x : allShips) {
-            if (x.getProdDate().after(dateForComparison)) {
-                shipsFoundByAfterDate.add(x);
+        List<Ship> allShips = getAllShipsUnfiltered();
+        List<Ship> shipsBetweenTwoDates = new ArrayList<>();
+
+
+        if (after != null && before == null) {
+            // получаем год из переданного параметра after или before
+            Date dateAfter = new Date(after);
+
+            Calendar calendarAfter = Calendar.getInstance(TimeZone.getTimeZone("Europe/Paris"));
+            calendarAfter.setTime(dateAfter);
+
+            int afterYear = calendarAfter.get(Calendar.YEAR);
+
+            int shipProdYear;
+
+            for (Ship x : allShips) {
+                // Получаем год создания корабля
+                Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Europe/Paris"));
+                cal.setTime(x.getProdDate());
+                shipProdYear = cal.get(Calendar.YEAR);
+                if (shipProdYear >= afterYear) {
+                    shipsBetweenTwoDates.add(x);
+                }
             }
         }
-        return shipsFoundByAfterDate;
+
+        if (before != null && after == null) {
+            // получаем год из переданного параметра after или before
+            Date dateBefore = new Date(before);
+
+            Calendar calendarBefore = Calendar.getInstance(TimeZone.getTimeZone("Europe/Paris"));
+            calendarBefore.setTime(dateBefore);
+
+            int beforeYear = calendarBefore.get(Calendar.YEAR);
+
+            int shipProdYear;
+
+            for (Ship x : allShips) {
+                // Получаем год создания корабля
+                Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Europe/Paris"));
+                cal.setTime(x.getProdDate());
+                shipProdYear = cal.get(Calendar.YEAR);
+                if (shipProdYear <= beforeYear) {
+                    shipsBetweenTwoDates.add(x);
+                }
+            }
+        }
+
+        if (before != null && after != null) {
+            // получаем год из переданного параметра after или before
+            Date dateBefore = new Date(before);
+            Date dateAfter = new Date(after);
+
+            Calendar calendarBefore = Calendar.getInstance(TimeZone.getTimeZone("Europe/Paris"));
+            Calendar calendarAfter = Calendar.getInstance(TimeZone.getTimeZone("Europe/Paris"));
+
+            calendarBefore.setTime(dateBefore);
+            calendarAfter.setTime(dateAfter);
+
+            int beforeYear = calendarBefore.get(Calendar.YEAR);
+            int afterYear = calendarAfter.get(Calendar.YEAR);
+
+            int shipProdYear;
+
+            for (Ship x : allShips) {
+                // Получаем год создания корабля
+                Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Europe/Paris"));
+                cal.setTime(x.getProdDate());
+                shipProdYear = cal.get(Calendar.YEAR);
+                // Сравниваем год создания корабля с переданными в функцию параметрами
+                if (shipProdYear >= afterYear && shipProdYear <= beforeYear) {
+                    shipsBetweenTwoDates.add(x);
+                }
+            }
+
+        }
+
+        return shipsBetweenTwoDates;
     }
 
     public List<Ship> getShipsBetweenMinAndMaxSpeedRange (Double minSpeed, Double maxSpeed) {
@@ -326,9 +388,26 @@ public class ShipServiceImpl implements ShipService {
 
         // Возвращаем список кораблей, найденных по переданным параметрам
         List<Ship> filteredShips = new ArrayList<>();
+
+        if (name != null) {
+            filteredShips = getShipsByFullOrPartialName(name);
+            return filteredShips;
+        }
+
+        if (planet != null) {
+            filteredShips = getShipsByFullOrPartialPlanetName(name);
+            return filteredShips;
+        }
+
+        // корабли по дате
+        if (after != null || before != null) {
+            filteredShips = getShipsBetweenProdDates(before, after);
+            return filteredShips;
+        }
+
+
         if (minCrewSize != null || maxCrewSize != null) {
             filteredShips = getShipsBetweenMinAndMaxCrewSize(sortedByOrder, minCrewSize, maxCrewSize);
-
             return filteredShips;
         }
 

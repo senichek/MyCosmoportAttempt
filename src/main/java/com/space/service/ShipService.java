@@ -20,9 +20,9 @@ public interface ShipService {
 
     List<Ship> getShipsByFullOrPartialPlanetName(String name);
 
-    public List<Ship> getShipsBeforeDate(Long before);
+    public List<Ship> getShipsByType (ShipType type);
 
-    public List<Ship> getShipsAfterDate(Long after);
+    public List<Ship> getShipsBetweenProdDates(Long before, Long after);
 
     public List<Ship> getShipsBetweenMinAndMaxSpeedRange (Double minSpeed, Double maxSpeed);
 
