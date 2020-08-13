@@ -46,14 +46,13 @@ public class ShipServiceImpl implements ShipService {
     }
 
     @Override
-    public List<Ship> getShipsByFullOrPartialName(String name) {
+    public List<Ship> getShipsByFullOrPartialName(String name, List<Ship> ships) {
 
         /* Поиск по полям name и planet происходить по частичному соответствию. Например, если в БД есть корабль
         с именем «Левиафан», а параметр name задан как «иа» - такой корабль должен отображаться в результатах (Левиафан). */
 
         List<Ship> shipsFoundByName = new ArrayList<>();
-        List<Ship> allShips = getAllShipsUnfiltered();
-        for (Ship x : allShips) {
+        for (Ship x : ships) {
             // возвращает true если имя включает в себя последновательность символов name
             if (x.getName().contains(name)) {
                 shipsFoundByName.add(x);
@@ -63,10 +62,9 @@ public class ShipServiceImpl implements ShipService {
     }
 
     @Override
-    public List<Ship> getShipsByFullOrPartialPlanetName(String name) {
+    public List<Ship> getShipsByFullOrPartialPlanetName(String name, List<Ship> ships) {
         List<Ship> shipsFoundByPlanetName = new ArrayList<>();
-        List<Ship> allShips = getAllShipsUnfiltered();
-        for (Ship x : allShips) {
+        for (Ship x : ships) {
             if (x.getPlanet().contains(name)) {
                 shipsFoundByPlanetName.add(x);
             }
@@ -74,10 +72,11 @@ public class ShipServiceImpl implements ShipService {
         return shipsFoundByPlanetName;
     }
 
-    public List<Ship> getShipsByType (ShipType type) {
+    public List<Ship> getShipsByType (ShipType type, List<Ship> ships) {
+
         List<Ship> shipsFoundByShipType = new ArrayList<>();
-        List<Ship> allShips = getAllShipsUnfiltered();
-        for (Ship x : allShips) {
+
+        for (Ship x : ships) {
             if (x.getShipType() == type) {
                 shipsFoundByShipType.add(x);
             }
@@ -86,11 +85,9 @@ public class ShipServiceImpl implements ShipService {
     }
 
     @Override
-    public List<Ship> getShipsBetweenProdDates(Long before, Long after) {
+    public List<Ship> getShipsBetweenProdDates(Long before, Long after, List<Ship> ships) {
 
-        List<Ship> allShips = getAllShipsUnfiltered();
         List<Ship> shipsBetweenTwoDates = new ArrayList<>();
-
 
         if (after != null && before == null) {
             // получаем год из переданного параметра after или before
@@ -103,12 +100,12 @@ public class ShipServiceImpl implements ShipService {
 
             int shipProdYear;
 
-            for (Ship x : allShips) {
+            for (Ship x : ships) {
                 // Получаем год создания корабля
                 Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Europe/Paris"));
                 cal.setTime(x.getProdDate());
                 shipProdYear = cal.get(Calendar.YEAR);
-                if (shipProdYear >= afterYear) {
+                if (shipProdYear > afterYear) {
                     shipsBetweenTwoDates.add(x);
                 }
             }
@@ -125,7 +122,7 @@ public class ShipServiceImpl implements ShipService {
 
             int shipProdYear;
 
-            for (Ship x : allShips) {
+            for (Ship x : ships) {
                 // Получаем год создания корабля
                 Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Europe/Paris"));
                 cal.setTime(x.getProdDate());
@@ -152,13 +149,13 @@ public class ShipServiceImpl implements ShipService {
 
             int shipProdYear;
 
-            for (Ship x : allShips) {
+            for (Ship x : ships) {
                 // Получаем год создания корабля
                 Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Europe/Paris"));
                 cal.setTime(x.getProdDate());
                 shipProdYear = cal.get(Calendar.YEAR);
                 // Сравниваем год создания корабля с переданными в функцию параметрами
-                if (shipProdYear >= afterYear && shipProdYear <= beforeYear) {
+                if (shipProdYear > afterYear && shipProdYear <= beforeYear) {
                     shipsBetweenTwoDates.add(x);
                 }
             }
@@ -168,13 +165,12 @@ public class ShipServiceImpl implements ShipService {
         return shipsBetweenTwoDates;
     }
 
-    public List<Ship> getShipsBetweenMinAndMaxSpeedRange (Double minSpeed, Double maxSpeed) {
+    public List<Ship> getShipsBetweenMinAndMaxSpeedRange (Double minSpeed, Double maxSpeed, List<Ship> ships) {
 
-        List<Ship> allShips = getAllShipsUnfiltered();
         List<Ship> shipsBetweenMinAndMaxSpeedRange = new ArrayList<>();
 
         if (minSpeed != null && maxSpeed == null) {
-            for (Ship x : allShips) {
+            for (Ship x : ships) {
                 if (x.getSpeed() >= minSpeed) {
                     shipsBetweenMinAndMaxSpeedRange.add(x);
                 }
@@ -182,7 +178,7 @@ public class ShipServiceImpl implements ShipService {
         }
 
         if (maxSpeed != null && minSpeed == null) {
-            for (Ship x : allShips) {
+            for (Ship x : ships) {
                 if (x.getSpeed() <= maxSpeed) {
                     shipsBetweenMinAndMaxSpeedRange.add(x);
                 }
@@ -190,7 +186,7 @@ public class ShipServiceImpl implements ShipService {
         }
 
         if (maxSpeed != null && minSpeed != null) {
-            for (Ship x : allShips) {
+            for (Ship x : ships) {
                 if (x.getSpeed() >= minSpeed && x.getSpeed() <= maxSpeed) {
                     shipsBetweenMinAndMaxSpeedRange.add(x);
                 }
@@ -202,7 +198,7 @@ public class ShipServiceImpl implements ShipService {
     }
 
     @Override
-    public List<Ship> getShipsBetweenMinAndMaxCrewSize(List<Ship> ships, Integer minCrewSize, Integer maxCrewSize) {
+    public List<Ship> getShipsBetweenMinAndMaxCrewSize(Integer minCrewSize, Integer maxCrewSize, List<Ship> ships) {
 
         List<Ship> shipsBetweenMinAndMaxCrewSize = new ArrayList<>();
 
@@ -234,6 +230,59 @@ public class ShipServiceImpl implements ShipService {
         return shipsBetweenMinAndMaxCrewSize;
     }
 
+    @Override
+    public List<Ship> getShipsBetweenMinAndMaxRating(Double minRating, Double maxRating, List<Ship> ships) {
+
+        List<Ship> shipsBetweenMinAndMaxRating = new ArrayList<>();
+
+        if (minRating != null && maxRating == null) {
+            for (Ship x : ships) {
+                if (x.getRating() >= minRating) {
+                    shipsBetweenMinAndMaxRating.add(x);
+                }
+            }
+        }
+
+        if (maxRating != null && minRating == null) {
+            for (Ship x : ships) {
+                if (x.getRating() <= maxRating) {
+                    shipsBetweenMinAndMaxRating.add(x);
+                }
+            }
+        }
+
+        if (maxRating != null && minRating != null) {
+            for (Ship x : ships) {
+                if (x.getRating() >= minRating && x.getRating() <= maxRating) {
+                    shipsBetweenMinAndMaxRating.add(x);
+                }
+            }
+
+        }
+
+        return shipsBetweenMinAndMaxRating;
+    }
+
+    public List<Ship> getShipsByUsedUnusedParam(boolean used, List <Ship> ships) {
+        List<Ship> usedOrUnusedShips = new ArrayList<>();
+        if (used == true) {
+            for (Ship x : ships) {
+                if (x.getUsed() == true) {
+                    usedOrUnusedShips.add(x);
+                }
+            }
+        }
+
+        if (used == false) {
+            for (Ship x : ships) {
+                if (x.getUsed() == false) {
+                    usedOrUnusedShips.add(x);
+                }
+            }
+        }
+
+        return usedOrUnusedShips;
+    }
 
     @Override
     public Ship updateShip(Ship oldShip, Ship newShip) throws IllegalArgumentException {
@@ -276,10 +325,10 @@ public class ShipServiceImpl implements ShipService {
                 Collections.sort(ships, new Comparator<Ship>() {
                     @Override
                     public int compare(Ship o1, Ship o2) {
-                        if (o1.getProdDate().before(o2.getProdDate())) {
+                        if (o2.getProdDate().before(o1.getProdDate())) {
                             return 1;
                         }
-                        if (o1.getProdDate().after(o2.getProdDate())) {
+                        if (o2.getProdDate().after(o1.getProdDate())) {
                             return -1;
                         }
                         else return 0;
@@ -325,28 +374,26 @@ public class ShipServiceImpl implements ShipService {
         Integer indexTO = 0;
         Integer indexFrom = 0;
 
-        /* Инструкции из задания:
-        Если параметр pageNumber не указан – нужно использовать значение 0.
-        Если параметр pageSize не указан – нужно использовать значение 3. */
-        if (pageSize == null || pageNumber == null) {
-            return ships.subList(0, 3);
+
+        // Если параметр pageNumber не указан – нужно использовать значение 0.
+        if (pageNumber == null) {
+            pageNumber = 0;
+        }
+        // Если параметр pageSize не указан – нужно использовать дефолтное значение 3.
+        if (pageSize == null) {
+            pageSize = 3;
         }
 
         /*но если получаем параметры PageSize и PageNumber, то выводим часть списка на основе indexFrom и indexTO.
         например, при размере страницы 5 и номере страницы 2 выводим список кораблей с 6 по 10 номер. */
-        else {
+        indexFrom = pageNumber * pageSize;
+        indexTO = indexFrom + pageSize;
 
-            indexFrom = pageNumber * pageSize;
-            indexTO = indexFrom + pageSize;
-
-            /* indexTo не должен выходить за пределы подсписка. Если indexTo выходит за пределы списка, то
-            переменной indexTO присваивается значение равное размеру списка*/
-            if (indexTO > ships.size()) {
-                indexTO = ships.size();
-            }
-
-            return ships.subList(indexFrom, indexTO);
-        }
+        /* indexTo не должен выходить за пределы подсписка. Если indexTo выходит за пределы списка, то
+           переменной indexTO присваивается значение равное размеру списка*/
+        if (indexTO > ships.size()) {
+            indexTO = ships.size();
+        } return ships.subList(indexFrom, indexTO);
     }
 
     @Override
@@ -377,43 +424,43 @@ public class ShipServiceImpl implements ShipService {
             Integer pageNumber,
             Integer pageSize) {
 
-        /* Сначала получаем список кораблей и сортируем этот список по полю Order. После этого
-           фильтруем список по другим полям (например, по макс. и мин. скорости). */
+        /* Получаем список кораблей и фильтруем его по другим полям (по переданным параметрам,
+           например, по макс. и мин. скорости). */
 
-        // Получаем весь список кораблей
-        List<Ship> allShips = getAllShipsUnfiltered();
-
-        // сортируем по полю Order
-        List<Ship> sortedByOrder = sortShipsByOrder(allShips, order);
-
-        // Возвращаем список кораблей, найденных по переданным параметрам
-        List<Ship> filteredShips = new ArrayList<>();
+        List<Ship> filteredShips = getAllShipsUnfiltered();
 
         if (name != null) {
-            filteredShips = getShipsByFullOrPartialName(name);
-            return filteredShips;
+            filteredShips = getShipsByFullOrPartialName(name, filteredShips);
         }
 
         if (planet != null) {
-            filteredShips = getShipsByFullOrPartialPlanetName(name);
-            return filteredShips;
+            filteredShips = getShipsByFullOrPartialPlanetName(planet, filteredShips);
         }
 
-        // корабли по дате
         if (after != null || before != null) {
-            filteredShips = getShipsBetweenProdDates(before, after);
-            return filteredShips;
+            filteredShips = getShipsBetweenProdDates(before, after, filteredShips);
         }
-
 
         if (minCrewSize != null || maxCrewSize != null) {
-            filteredShips = getShipsBetweenMinAndMaxCrewSize(sortedByOrder, minCrewSize, maxCrewSize);
-            return filteredShips;
+            filteredShips = getShipsBetweenMinAndMaxCrewSize(minCrewSize, maxCrewSize, filteredShips);
         }
 
-        // Если параметры переданы не были, то возвращаем все корабли сразу
-        else {
-            return allShips;
+        if (minSpeed != null || maxSpeed != null) {
+            filteredShips = getShipsBetweenMinAndMaxSpeedRange(minSpeed, maxSpeed, filteredShips);
         }
+
+        if (minRating != null || maxRating != null) {
+            filteredShips = getShipsBetweenMinAndMaxRating(minRating, maxRating, filteredShips);
+        }
+
+        if (shipType != null) {
+            filteredShips = getShipsByType(shipType, filteredShips);
+        }
+
+        if (isUsed != null) {
+            filteredShips = getShipsByUsedUnusedParam(isUsed, filteredShips);
+        }
+
+        return filteredShips;
     }
 }

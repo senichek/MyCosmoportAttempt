@@ -49,8 +49,11 @@ public class ShipController {
                 name, planet, shipType, after, before, isUsed, minSpeed, maxSpeed,
                 minCrewSize, maxCrewSize, minRating, maxRating, order, pageNumber, pageSize);
 
+        // сортируем по полю Order
+        List<Ship> sortedByOrder = shipService.sortShipsByOrder(filteredShips, order);
+
         // Возвращаем часть списка в зависимоости от размера страницы и ее номера.
-        return shipService.getSublistBasedOnPageSizeAndPageNumber(filteredShips, pageNumber, pageSize);
+        return shipService.getSublistBasedOnPageSizeAndPageNumber(sortedByOrder, pageNumber, pageSize);
     }
 
     @RequestMapping(path = "/rest/ships/count", method = RequestMethod.GET)

@@ -16,17 +16,21 @@ public interface ShipService {
 
     Ship getShip(Long id);
 
-    List<Ship> getShipsByFullOrPartialName(String name);
+    List<Ship> getShipsByFullOrPartialName(String name, List<Ship> ships);
 
-    List<Ship> getShipsByFullOrPartialPlanetName(String name);
+    List<Ship> getShipsByFullOrPartialPlanetName(String name, List<Ship> ships);
 
-    public List<Ship> getShipsByType (ShipType type);
+    public List<Ship> getShipsBetweenProdDates(Long before, Long after, List<Ship> ships);
 
-    public List<Ship> getShipsBetweenProdDates(Long before, Long after);
+    public List<Ship> getShipsBetweenMinAndMaxCrewSize(Integer minCrewSize, Integer maxCrewSize, List<Ship> ships);
 
-    public List<Ship> getShipsBetweenMinAndMaxSpeedRange (Double minSpeed, Double maxSpeed);
+    public List<Ship> getShipsBetweenMinAndMaxSpeedRange(Double minSpeed, Double maxSpeed, List<Ship> ships);
 
-    public List<Ship> getShipsBetweenMinAndMaxCrewSize (List<Ship> ships, Integer minCrewSize, Integer maxCrewSize);
+    public List<Ship> getShipsBetweenMinAndMaxRating(Double minRating, Double maxRating, List<Ship> ships);
+
+    public List<Ship> getShipsByType(ShipType type, List<Ship> ships);
+
+    public List<Ship> getShipsByUsedUnusedParam(boolean used, List <Ship> ships);
 
     Ship updateShip(Ship oldShip, Ship newShip) throws IllegalArgumentException;
 
