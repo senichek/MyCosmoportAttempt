@@ -5,7 +5,9 @@ import com.space.model.Ship;
 import com.space.model.ShipType;
 import com.space.repository.ShipRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.transaction.Transactional;
 import java.util.*;
@@ -36,13 +38,17 @@ public class ShipServiceImpl implements ShipService {
     }
 
     @Override
-    public Ship saveShip(Ship ship) {
-        return null;
+    @ResponseStatus(HttpStatus.OK)
+    public void saveShip(Ship ship) {
+
+        shipRepository.save(ship);
+
     }
 
     @Override
     public Ship getShip(Long id) {
-        return null;
+
+        return shipRepository.findById(id).get();
     }
 
     @Override
@@ -398,12 +404,53 @@ public class ShipServiceImpl implements ShipService {
 
     @Override
     public boolean isShipValid(Ship ship) {
-        return false;
+        /*
+        Если в запросе на создание корабля нет параметра “isUsed”, то считаем, что пришло значение “false”.
+        Мы не можем создать корабль, если:
+        - указаны не все параметры из Data Params (кроме isUsed);
+        - длина значения параметра “name” или “planet” превышает размер соответствующего поля в БД (50 символов);
+        - значение параметра “name” или “planet” пустая строка;
+        - скорость или размер команды находятся вне заданных пределов;
+        - “prodDate”:[Long] < 0;
+        - год производства находятся вне заданных пределов.
+        В случае всего вышеперечисленного необходимо ответить ошибкой с кодом 400. */
+
+        if (ship.getName() == null || ship.getPlanet() == null || ship.getName().length() == 0
+                || ship.getPlanet().length() == 0 || ship.getName().length() > 50 ||
+                ship.getPlanet().length() > 50 || ship.getShipType() == null || ship.getProdDate().getYear() < 0
+                || ship.getCrewSize() >= 300000000 || ship.getSpeed() == null ) {
+
+            return false;
+        }
+
+        return true;
     }
 
-    @Override
-    public double computeRating(double speed, boolean isUsed, Date prod) {
-        return 0;
+    public Double computeRating(Ship ship) {
+
+        /*
+        v — скорость корабля;
+        k — коэффициент, который равен 1 для нового корабля и 0,5 для использованного;
+        y0 — текущий год (не забудь, что «сейчас» 3019 год);
+        y1 — год выпуска корабля.
+        */
+
+        Double v = ship.getSpeed();
+        Double k = 1.0;
+
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Paris"));
+        calendar.setTime(ship.getProdDate());
+
+
+        int shipProdYear = calendar.get(Calendar.YEAR);
+        int currentYear = 3019;
+
+        if (ship.getUsed()) {
+            k = 0.5;
+        }
+
+        Double rating = (80 * v * k) / (currentYear - shipProdYear + 1);
+        return rating;
     }
 
     @Override
@@ -463,4 +510,5 @@ public class ShipServiceImpl implements ShipService {
 
         return filteredShips;
     }
+
 }

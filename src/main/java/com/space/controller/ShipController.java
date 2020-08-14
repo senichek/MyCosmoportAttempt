@@ -4,10 +4,11 @@ import com.space.model.Ship;
 import com.space.model.ShipType;
 import com.space.service.ShipService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -81,4 +82,43 @@ public class ShipController {
                     isUsed, minSpeed, maxSpeed, minCrewSize, maxCrewSize,
                     minRating, maxRating, order, pageNumber, pageSize).size();
         }
+
+    @RequestMapping(path = "/rest/ships", method = RequestMethod.POST)
+    public ResponseEntity<Ship> createShip (@RequestBody Ship ship) {
+
+        /* ResponseEntity представляет полный HTTP-ответ: код состояния, заголовки и тело.
+        Из-за этого мы можем использовать его для полной настройки HTTP-ответа. */
+
+        if (!shipService.isShipValid(ship)) {
+            return new ResponseEntity<>(ship, HttpStatus.BAD_REQUEST);
+        } else {
+
+            Ship shipToAddToDB = new Ship();
+            shipToAddToDB.setName(ship.getName());
+            shipToAddToDB.setPlanet(ship.getPlanet());
+            shipToAddToDB.setProdDate(ship.getProdDate());
+            shipToAddToDB.setCrewSize(ship.getCrewSize());
+            shipToAddToDB.setSpeed(ship.getSpeed());
+            shipToAddToDB.setShipType(ship.getShipType());
+
+           // Если в запросе на создание корабля нет параметра “isUsed”, то считаем, что пришло значение “false”.
+            if (ship.getUsed() == null) {
+                shipToAddToDB.setUsed(false);
+            } else {
+                shipToAddToDB.setUsed(ship.getUsed());
+            }
+
+
+            shipToAddToDB.setRating(shipService.computeRating(shipToAddToDB));
+
+            if (ship.getUsed() == null) {
+                ship.setUsed(false);
+            }
+
+            shipService.saveShip(shipToAddToDB);
+
+            return new ResponseEntity<>(shipToAddToDB, HttpStatus.OK);
+        }
+
+    }
 }

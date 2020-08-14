@@ -12,7 +12,7 @@ public interface ShipService {
     // Получаем список кораблей без какой-либо фильтрации или сортировки
     List<Ship> getAllShipsUnfiltered();
 
-    Ship saveShip(Ship ship);
+    void saveShip(Ship ship);
 
     Ship getShip(Long id);
 
@@ -31,6 +31,8 @@ public interface ShipService {
     public List<Ship> getShipsByType(ShipType type, List<Ship> ships);
 
     public List<Ship> getShipsByUsedUnusedParam(boolean used, List <Ship> ships);
+
+    public Double computeRating (Ship ship);
 
     Ship updateShip(Ship oldShip, Ship newShip) throws IllegalArgumentException;
 
@@ -60,5 +62,4 @@ public interface ShipService {
 
     boolean isShipValid(Ship ship);
 
-    double computeRating(double speed, boolean isUsed, Date prod);
 }
