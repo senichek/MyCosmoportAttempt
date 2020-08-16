@@ -34,9 +34,11 @@ public interface ShipService {
 
     public Double computeRating (Ship ship);
 
+    public boolean shipExists(Long id);
+
     Ship updateShip(Ship oldShip, Ship newShip) throws IllegalArgumentException;
 
-    void deleteShip(Ship ship);
+    void deleteShip(Long id);
 
     public List<Ship> getFilteredShips(
             String name,

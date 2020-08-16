@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Date;
 import java.util.List;
@@ -119,6 +120,49 @@ public class ShipController {
 
             return new ResponseEntity<>(shipToAddToDB, HttpStatus.OK);
         }
+
+    }
+
+    @RequestMapping(path = "/rest/ships/{id}", method = RequestMethod.GET)
+    public ResponseEntity<Ship> getShip(@PathVariable("id") Long id) {
+
+        /* Если корабль не найден в БД, необходимо ответить ошибкой с кодом 404.
+        Если значение id не валидное, необходимо ответить ошибкой с кодом 400. */
+        Ship ship = new Ship();
+
+        if (id != null && id != 0 && shipService.shipExists(id)) {
+            ship = shipService.getShip(id);
+            return new ResponseEntity<>(ship, HttpStatus.OK);
+        }
+
+        if (id == null || id == 0) {
+
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The index must not be null or 0;");
+
+        }
+
+        else throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ship with index " + id + " doesn't exist;");
+
+    }
+
+    @RequestMapping(path = "/rest/ships/{id}")
+    public ResponseEntity<String> deleteShip(@PathVariable("id") Long id) {
+
+        /* Если корабль не найден в БД, необходимо ответить ошибкой с кодом 404.
+        Если значение id не валидное, необходимо ответить ошибкой с кодом 400. */
+
+        if (id != null && id != 0 && shipService.shipExists(id)) {
+            shipService.deleteShip(id);
+            return new ResponseEntity<>("Ship was deleted;", HttpStatus.OK);
+        }
+
+        if (id == null || id == 0 ) {
+
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, id + " is invalid (it must not be zero or null;");
+
+        }
+
+        else throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ship was not found;");
 
     }
 }

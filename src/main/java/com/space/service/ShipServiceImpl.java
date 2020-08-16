@@ -46,6 +46,17 @@ public class ShipServiceImpl implements ShipService {
     }
 
     @Override
+    public boolean shipExists(Long id) {
+
+        for (Ship x : getAllShipsUnfiltered()) {
+            if (x.getId() == id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public Ship getShip(Long id) {
 
         return shipRepository.findById(id).get();
@@ -296,7 +307,10 @@ public class ShipServiceImpl implements ShipService {
     }
 
     @Override
-    public void deleteShip(Ship ship) {
+    public void deleteShip(Long id) {
+
+        Ship shipToDelete = getShip(id);
+        shipRepository.delete(shipToDelete);
 
     }
 
