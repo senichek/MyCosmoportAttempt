@@ -38,7 +38,7 @@ public interface ShipService {
 
     public boolean shipExists(Long id);
 
-    Ship updateShip(Ship oldShip, Ship newShip) throws IllegalArgumentException;
+    Ship updateShip(Long id, Ship ship);
 
     void deleteShip(Long id);
 
