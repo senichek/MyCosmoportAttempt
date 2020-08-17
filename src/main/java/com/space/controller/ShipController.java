@@ -8,8 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -161,6 +159,88 @@ public class ShipController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, id + " is invalid (it must not be zero or null;");
 
         }
+
+        else throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ship was not found;");
+
+    }
+
+    @RequestMapping(path = "/rest/ships/{id}", method = RequestMethod.POST)
+    public ResponseEntity<Ship> updateShip(@PathVariable("id") Long id, @RequestBody Ship ship) {
+
+        /* Обновлять нужно только те поля, которые не null. Если корабль не найден в БД, необходимо ответить ошибкой
+        с кодом 404. Если значение id не валидное, необходимо ответить ошибкой с кодом 400. */
+
+        if (id == null || id == 0 ) {
+
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, id + " is invalid (it must not be zero or null;");
+
+        }
+
+        if (shipService.shipExists(id)) {
+
+            Ship updatedShip = shipService.getShip(id);
+
+            if (ship.getName() != null) {
+                {
+                    if (!ship.getName().isEmpty())
+                    updatedShip.setName(ship.getName());
+                }
+
+                if (ship.getName().isEmpty()) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "");
+                }
+            }
+
+            if (ship.getPlanet() != null) {
+                {
+                    if (!ship.getPlanet().isEmpty())
+                        updatedShip.setPlanet(ship.getPlanet());
+                }
+
+                if (ship.getPlanet().isEmpty()) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "");
+                }
+            }
+
+            if (ship.getShipType() != null) {
+                updatedShip.setShipType(ship.getShipType());
+            }
+
+            if (ship.getProdDate() != null) {
+                if (ship.getProdDate().getTime() < 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "");
+                } else updatedShip.setProdDate(ship.getProdDate());
+            }
+
+            if (ship.getUsed() != null) {
+                updatedShip.setUsed(ship.getUsed());
+            }
+
+            if (ship.getSpeed() != null) {
+                updatedShip.setSpeed(ship.getSpeed());
+            }
+
+            if (ship.getCrewSize() != null) {
+                if (ship.getCrewSize() < 300000000) {
+                    updatedShip.setCrewSize(ship.getCrewSize());
+                }
+                if (ship.getCrewSize() < 0 || ship.getCrewSize() == null || ship.getCrewSize() >= 300000000) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "");
+                }
+            }
+
+
+            // Пересчитываем рейтинг, так как параметры корабля могли обновиться.
+            Double updatedRating = shipService.computeRating(updatedShip);
+
+            updatedShip.setRating(updatedRating);
+
+            return new ResponseEntity<>(updatedShip, HttpStatus.OK);
+
+        }
+
+        // При запросе POST /rest/ships/{id} с пустым телом запроса, корабль не должен изменяться.
+
 
         else throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ship was not found;");
 

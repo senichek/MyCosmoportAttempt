@@ -34,6 +34,8 @@ public interface ShipService {
 
     public Double computeRating (Ship ship);
 
+    public double round(double value, int places);
+
     public boolean shipExists(Long id);
 
     Ship updateShip(Ship oldShip, Ship newShip) throws IllegalArgumentException;

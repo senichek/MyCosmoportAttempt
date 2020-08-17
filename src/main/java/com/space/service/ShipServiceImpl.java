@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.transaction.Transactional;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 @Service
@@ -440,6 +442,14 @@ public class ShipServiceImpl implements ShipService {
         return true;
     }
 
+    public double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = BigDecimal.valueOf(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+
     public Double computeRating(Ship ship) {
 
         /*
@@ -464,7 +474,11 @@ public class ShipServiceImpl implements ShipService {
         }
 
         Double rating = (80 * v * k) / (currentYear - shipProdYear + 1);
-        return rating;
+
+        // округляем до сотых
+        double roundedRating = round(rating, 2);
+
+        return roundedRating;
     }
 
     @Override
